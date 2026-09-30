@@ -1,0 +1,8 @@
+{
+  "valido": {
+    "nome": "Usuario Teste",
+    "senha": "12345"
+  },
+  "emailInvalido": "emailinvalido",
+  "senhaIncorreta": "senhaErrada"
+}
