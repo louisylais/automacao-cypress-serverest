@@ -16,7 +16,7 @@ describe('Login - ServeRest', () => {
   it('CT01 - Deve fazer login com sucesso [usuario]', () => {
     cy.login(usuario.email, usuario.password)
     cy.url().should('include', '/home')
-    cy.contains('Bem Vindo').should('be.visible')
+    cy.get('[data-testid="logout"]').should('be.visible')
     cy.window().its('localStorage.serverest/userToken').should('exist')
   })
 
