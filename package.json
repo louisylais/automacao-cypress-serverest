@@ -1,17 +1,23 @@
 {
   "name": "automacao-cypress-serverest",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Automação de testes E2E do front-end do ServeRest (login e cadastro de usuários) com Cypress",
   "scripts": {
     "test": "cypress run",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "cypress",
+    "qa",
+    "automacao",
+    "testes-e2e",
+    "serverest"
+  ],
+  "author": "Louisy Laís",
+  "license": "MIT",
   "devDependencies": {
-    "cypress": "^15.18.1"
+    "cypress": "^15.18.1",
+    "cypress-mochawesome-reporter": "^5.0.0"
   }
 }
