@@ -45,6 +45,8 @@ describe('Login - ServeRest', () => {
     cy.fixture('usuarios').then((dados) => {
       cy.login(dados.emailInvalido, 'teste')
     })
-    cy.contains('Email deve ser um email válido').should('be.visible')
+    // O campo é type="email": a validação nativa do navegador bloqueia o envio
+    cy.get('[data-testid="email"]').invoke('prop', 'validationMessage').should('not.be.empty')
+    cy.url().should('include', '/login')
   })
 })

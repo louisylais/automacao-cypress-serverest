@@ -34,7 +34,9 @@ describe('Cadastro de usuários - ServeRest', () => {
 
   it('CT05 - Não deve cadastrar com email em formato inválido', () => {
     cy.cadastrar({ nome: dados.valido.nome, email: dados.emailInvalido, senha: dados.valido.senha })
-    cy.contains('Email deve ser um email válido').should('be.visible')
+    // O campo é type="email": a validação nativa do navegador bloqueia o envio
+    cy.get('[data-testid="email"]').invoke('prop', 'validationMessage').should('not.be.empty')
+    cy.url().should('include', '/cadastrarusuarios')
   })
 
   it('CT06 - Não deve cadastrar com email já existente', () => {
