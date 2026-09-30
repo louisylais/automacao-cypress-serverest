@@ -2,6 +2,9 @@ const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   allowCypressEnv: false,
+  expose: {
+    apiUrl: 'https://serverest.dev',
+  },
   reporter: 'cypress-mochawesome-reporter',
   reporterOptions: {
     reportDir: 'cypress/reports',
@@ -12,9 +15,6 @@ module.exports = defineConfig({
   },
   e2e: {
     baseUrl: 'https://front.serverest.dev',
-    env: {
-      apiUrl: 'https://serverest.dev',
-    },
     setupNodeEvents(on, config) {
       require('cypress-mochawesome-reporter/plugin')(on)
       return config

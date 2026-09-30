@@ -55,7 +55,7 @@ Depois da execução headless, o relatório fica em `cypress/reports/index.html`
 | CT02 | Senha incorreta | "Email e/ou senha inválidos" |
 | CT03 | E-mail não cadastrado | "Email e/ou senha inválidos" |
 | CT04 | Senha vazia | "Password é obrigatório" |
-| CT05 | E-mail em formato inválido | "Email deve ser um email válido" |
+| CT05 | E-mail em formato inválido | Bloqueado pela validação nativa do navegador |
 
 ### Cadastro
 
@@ -65,7 +65,7 @@ Depois da execução headless, o relatório fica em `cypress/reports/index.html`
 | CT02 | Nome vazio | "Nome é obrigatório" |
 | CT03 | E-mail vazio | "Email é obrigatório" |
 | CT04 | Senha vazia | "Password é obrigatório" |
-| CT05 | E-mail em formato inválido | "Email deve ser um email válido" |
+| CT05 | E-mail em formato inválido | Bloqueado pela validação nativa do navegador |
 | CT06 | E-mail já cadastrado | "Este email já está sendo usado" |
 | CT07 | Senha com 1 caractere | Aceito (comportamento atual, possível defeito) |
 | CT08 | Nome com 200 caracteres | Aceito (comportamento atual, possível defeito) |
