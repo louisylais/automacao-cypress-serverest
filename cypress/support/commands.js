@@ -14,7 +14,7 @@ Cypress.Commands.add('criarUsuarioApi', (dados = {}) => {
       ...dados,
     }
     return cy
-      .request('POST', `${Cypress.env('apiUrl')}/usuarios`, usuario)
+      .request('POST', `${Cypress.expose('apiUrl')}/usuarios`, usuario)
       .then((res) => {
         expect(res.status).to.eq(201)
         return { ...usuario, _id: res.body._id }
@@ -27,7 +27,7 @@ Cypress.Commands.add('excluirUsuarioApi', (id) => {
   if (!id) return
   cy.request({
     method: 'DELETE',
-    url: `${Cypress.env('apiUrl')}/usuarios/${id}`,
+    url: `${Cypress.expose('apiUrl')}/usuarios/${id}`,
     failOnStatusCode: false,
   })
 })
@@ -46,6 +46,6 @@ Cypress.Commands.add('cadastrar', ({ nome, email, senha, administrador = false }
   if (nome) cy.get('[data-testid="nome"]').type(nome)
   if (email) cy.get('[data-testid="email"]').type(email)
   if (senha) cy.get('[data-testid="password"]').type(senha, { log: false })
-  if (administrador) cy.get('[data-testid="administrador"]').check()
+  if (administrador) cy.get('[data-testid="checkbox"]').check()
   cy.get('[data-testid="cadastrar"]').click()
 })
