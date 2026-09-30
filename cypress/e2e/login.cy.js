@@ -1,60 +1,50 @@
-describe('Teste Login Serverest', () => {
+describe('Login - ServeRest', () => {
+  let usuario
 
-  const senhaValida = 'senha123'
-  let emailValido
-
-  beforeEach(() => {
-    emailValido = 'louisylais+' + Date.now() + '@gmail.com'
-    cy.request('POST', 'https://serverest.dev/usuarios', {
-      nome: 'Louisy Lais',
-      email: emailValido,
-      password: senhaValida,
-      administrador: 'false'
-    })
+  beforeEach(function () {
+    // Só cria usuário via API nos testes que precisam de um usuário cadastrado
+    if (this.currentTest.title.includes('[usuario]')) {
+      cy.criarUsuarioApi().then((u) => { usuario = u })
+    }
   })
 
-  // CT01 - Login com sucesso
-  it('CT01 - Deve fazer login com sucesso', () => {
-    cy.visit('/login')
-    cy.get('[data-testid="email"]').type(emailValido)
-    cy.get('[data-testid="password"]').type(senhaValida)
-    cy.get('[data-testid="entrar"]').click()
+  afterEach(() => {
+    if (usuario) cy.excluirUsuarioApi(usuario._id)
+    usuario = undefined
+  })
+
+  it('CT01 - Deve fazer login com sucesso [usuario]', () => {
+    cy.login(usuario.email, usuario.password)
+    cy.url().should('include', '/home')
     cy.contains('Bem Vindo').should('be.visible')
+    cy.window().its('localStorage.serverest/userToken').should('exist')
   })
 
-  // CT02 - Senha incorreta
-  it('CT02 - Não deve logar com senha incorreta', () => {
-    cy.visit('/login')
-    cy.get('[data-testid="email"]').type(emailValido)
-    cy.get('[data-testid="password"]').type('senhaErrada')
-    cy.get('[data-testid="entrar"]').click()
+  it('CT02 - Não deve logar com senha incorreta [usuario]', () => {
+    cy.fixture('usuarios').then((dados) => {
+      cy.login(usuario.email, dados.senhaIncorreta)
+    })
     cy.contains('Email e/ou senha inválidos').should('be.visible')
+    cy.url().should('include', '/login')
   })
 
-  // CT03 - Email não cadastrado
   it('CT03 - Não deve logar com email não cadastrado', () => {
-    cy.visit('/login')
-    cy.get('[data-testid="email"]').type('naoexiste+' + Date.now() + '@gmail.com')
-    cy.get('[data-testid="password"]').type(senhaValida)
-    cy.get('[data-testid="entrar"]').click()
+    cy.gerarEmail('naoexiste').then((email) => {
+      cy.login(email, 'senha123')
+    })
     cy.contains('Email e/ou senha inválidos').should('be.visible')
+    cy.url().should('include', '/login')
   })
 
-  // CT04 - Senha vazia
-  it('CT04 - Não deve logar com senha vazia', () => {
-    cy.visit('/login')
-    cy.get('[data-testid="email"]').type(emailValido)
-    cy.get('[data-testid="entrar"]').click()
+  it('CT04 - Não deve logar com senha vazia [usuario]', () => {
+    cy.login(usuario.email)
     cy.contains('Password é obrigatório').should('be.visible')
   })
 
-  // CT05 - Email formato inválido
-  it('CT05 - Não deve logar com email inválido', () => {
-    cy.visit('/login')
-    cy.get('[data-testid="email"]').type('emailinvalido')
-    cy.get('[data-testid="password"]').type('teste')
-    cy.get('[data-testid="entrar"]').click()
+  it('CT05 - Não deve logar com email em formato inválido', () => {
+    cy.fixture('usuarios').then((dados) => {
+      cy.login(dados.emailInvalido, 'teste')
+    })
     cy.contains('Email deve ser um email válido').should('be.visible')
   })
-
 })

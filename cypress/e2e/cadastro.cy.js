@@ -1,99 +1,73 @@
-describe('Teste Cadastro Serverest', () => {
+describe('Cadastro de usuários - ServeRest', () => {
+  let dados
 
-  // CT01 - Fluxo feliz
-  it('CT01 - Deve cadastrar um usuário com sucesso', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Louisy Lais')
-    cy.get('[data-testid="email"]').type('louisylais+' + Date.now() + '@gmail.com')
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="cadastrar"]').click()
-    cy.contains('Cadastro realizado com sucesso').should('be.visible')
+  before(() => {
+    cy.fixture('usuarios').then((f) => { dados = f })
   })
 
-  // CT02 - Campos obrigatórios
+  it('CT01 - Deve cadastrar um usuário com sucesso', () => {
+    cy.gerarEmail().then((email) => {
+      cy.cadastrar({ nome: dados.valido.nome, email, senha: dados.valido.senha })
+    })
+    cy.contains('Cadastro realizado com sucesso').should('be.visible')
+    cy.url().should('include', '/home')
+  })
+
   it('CT02 - Não deve cadastrar com campo nome vazio', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('')
-    cy.get('[data-testid="email"]').type('louisylais+' + Date.now() + '@gmail.com')
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="cadastrar"]').click()
+    cy.gerarEmail().then((email) => {
+      cy.cadastrar({ email, senha: dados.valido.senha })
+    })
     cy.contains('Nome é obrigatório').should('be.visible')
   })
 
   it('CT03 - Não deve cadastrar com campo email vazio', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Teste Usuario')
-    cy.get('[data-testid="email"]').type('')
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="cadastrar"]').click()
+    cy.cadastrar({ nome: dados.valido.nome, senha: dados.valido.senha })
     cy.contains('Email é obrigatório').should('be.visible')
   })
 
-  it('CT04 - Não deve cadastrar com campo senha vazia', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Teste Usuario')
-    cy.get('[data-testid="email"]').type('louisylais+' + Date.now() + '@gmail.com')
-    cy.get('[data-testid="password"]').type('')
-    cy.get('[data-testid="cadastrar"]').click()
+  it('CT04 - Não deve cadastrar com campo senha vazio', () => {
+    cy.gerarEmail().then((email) => {
+      cy.cadastrar({ nome: dados.valido.nome, email })
+    })
     cy.contains('Password é obrigatório').should('be.visible')
   })
 
-  // CT05 - Email inválido
   it('CT05 - Não deve cadastrar com email em formato inválido', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Teste Usuario')
-    cy.get('[data-testid="email"]').type('emailinvalido')
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="cadastrar"]').click()
+    cy.cadastrar({ nome: dados.valido.nome, email: dados.emailInvalido, senha: dados.valido.senha })
     cy.contains('Email deve ser um email válido').should('be.visible')
   })
 
-  // CT06 - Email duplicado
   it('CT06 - Não deve cadastrar com email já existente', () => {
-    const emailFixo = 'teste.duplicado@gmail.com'
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Usuario 1')
-    cy.get('[data-testid="email"]').type(emailFixo)
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="cadastrar"]').click()
-    
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Usuario 2')
-    cy.get('[data-testid="email"]').type(emailFixo)
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="cadastrar"]').click()
-    cy.contains('Este email já está sendo usado').should('be.visible')
+    // Pré-condição criada via API: o teste de tela valida apenas a duplicidade
+    cy.criarUsuarioApi().then((existente) => {
+      cy.cadastrar({ nome: 'Outro Usuario', email: existente.email, senha: dados.valido.senha })
+      cy.contains('Este email já está sendo usado').should('be.visible')
+      cy.excluirUsuarioApi(existente._id)
+    })
   })
 
-  // CT07 - Senha pequena
-  it('CT07 - Deve cadastrar mesmo com senha pequena', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Teste Senha')
-    cy.get('[data-testid="email"]').type('louisylais+' + Date.now() + '@gmail.com')
-    cy.get('[data-testid="password"]').type('1')
-    cy.get('[data-testid="cadastrar"]').click()
+  // Documenta o comportamento atual: o sistema não exige tamanho mínimo de senha.
+  // Possível defeito de regra de negócio, a ser confirmado com o requisito.
+  it('CT07 - Aceita cadastro com senha de 1 caractere (comportamento atual)', () => {
+    cy.gerarEmail().then((email) => {
+      cy.cadastrar({ nome: 'Teste Senha', email, senha: '1' })
+    })
     cy.contains('Cadastro realizado com sucesso').should('be.visible')
   })
 
-  // CT08 - Nome grande
-  it('CT08 - Deve cadastrar com nome muito grande', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('A'.repeat(200))
-    cy.get('[data-testid="email"]').type('louisylais+' + Date.now() + '@gmail.com')
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="cadastrar"]').click()
+  // Documenta o comportamento atual: o sistema não limita o tamanho do nome.
+  it('CT08 - Aceita cadastro com nome de 200 caracteres (comportamento atual)', () => {
+    cy.gerarEmail().then((email) => {
+      cy.cadastrar({ nome: 'A'.repeat(200), email, senha: dados.valido.senha })
+    })
     cy.contains('Cadastro realizado com sucesso').should('be.visible')
   })
 
-  // CT09 - Admin
   it('CT09 - Deve cadastrar usuário como administrador', () => {
-    cy.visit('/cadastrarusuarios')
-    cy.get('[data-testid="nome"]').type('Admin Teste')
-    cy.get('[data-testid="email"]').type('admin+' + Date.now() + '@gmail.com')
-    cy.get('[data-testid="password"]').type('12345')
-    cy.get('[data-testid="administrador"]').check()
-    cy.get('[data-testid="cadastrar"]').click()
+    cy.gerarEmail('admin').then((email) => {
+      cy.cadastrar({ nome: 'Admin Teste', email, senha: dados.valido.senha, administrador: true })
+    })
     cy.contains('Cadastro realizado com sucesso').should('be.visible')
+    cy.url().should('include', '/admin/home')
   })
-
 })
