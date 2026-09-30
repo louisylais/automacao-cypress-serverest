@@ -36,7 +36,7 @@ Cypress.Commands.add('excluirUsuarioApi', (id) => {
 Cypress.Commands.add('login', (email, senha) => {
   cy.visit('/login')
   if (email) cy.get('[data-testid="email"]').type(email)
-  if (senha) cy.get('[data-testid="password"]').type(senha, { log: false })
+  if (senha) cy.get('[data-testid="senha"]').type(senha, { log: false })
   cy.get('[data-testid="entrar"]').click()
 })
 
